@@ -81,7 +81,8 @@ def main():
 
     # print arc
     # run_benchmark()
-    # run_benchmark(n_battles=29, brief_cnt=0, use_predictive=True)
+    run_benchmark(n_battles=1, brief_cnt=0, use_predictive=True, mode='squad')
+    # run_benchmark(n_battles=1, brief_cnt=0, use_predictive=True)
 
 
     _=0
@@ -248,7 +249,7 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
     bm_report = True
     n_use_prev_results = 250
 
-    summary = open('./results/benchmark_%s_n%s.csv' % (mode, n_battles), 'w')
+    summary = open('../results/benchmark_%s_n%s.csv' % (mode, n_battles), 'w')
     summary.write('')
 
     if mode == '1v1':
@@ -328,7 +329,7 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
             if hp_init == None:
                 hp_init = 4
             if (n_battles > n_use_prev_results) or use_predictive:
-                df = pd.DataFrame.from_csv('./results/benchmark_squad_guide.csv')
+                df = pd.DataFrame.from_csv('../results/benchmark_squad_guide.csv')
                 hp_init = df.loc[tst_ship.ship_name_short]['enemy_health_1'] - 1
             bm_health_offset = 0
             run_cnt=0
@@ -365,8 +366,8 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
 
                 if (battle.team_1_winrate < 50) or (not iterate):
                     if run_cnt == 1 and iterate:
-                        if bm_health_offset < 0:
-                            raise Exception('Double bm_health offset!')
+                        # if bm_health_offset < 0:
+                        #     raise Exception('Double bm_health offset!')
                         bm_health_offset = -4
                         run_cnt = 0
                         continue
@@ -591,7 +592,7 @@ class Battle():
         def battle_summary_ph():
             pass
         if battle_summary:
-            battle_summary_path = './results/battle_summart.txt'
+            battle_summary_path = '../results/battle_summart.txt'
             f_write(battle_summary_path,'')
             print '--- Battle Set Summary ---\n'
 
