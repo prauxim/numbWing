@@ -16,8 +16,8 @@ from numbWing import *
 def main():
 
 
-    if not os.path.isdir('./results'):
-        os.mkdir('./results')
+    if not os.path.isdir('../results'):
+        os.mkdir('../results')
 
     example_battle()
 

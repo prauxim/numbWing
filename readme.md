@@ -20,9 +20,9 @@ The below information is only for those wishing to run the code, which is in a p
 2. Some form of IDE,  e.g. pyCharm, is reccommended. For the normal reasons, plus a lot of long enums (e.g. ship/pilot names) are used so autocomplete is great.
 
 
-## Running the examples
+## Running example_run.py
 
-By default main() will execute first when you run example_run.py. Here you can keep your various method(function) calls. Use If statements or comments to turn call on/off.
+Use your IDE or command prompt to run example_run.py. This should execute the 3 example runs called from main(). From here you can change parameter and comment/decomment functions, copy functions, change parameters, etc.
 ```
 def main():
 	...
@@ -30,15 +30,17 @@ def main():
 
 ### example_match
 
-Team objects instantiated for Red/Onyx team. Luke and Wedge are added to Red, with 4 Tie/LN Academy Pilots added to Onyx.
+Example match shows two teams being populated and a match being executed. Team objects instantiated for Red/Onyx team. Luke and Wedge are added to Red, with 4 Tie/LN Academy Pilots added to Onyx. With the current setting, this should produce breif output for 3 of the 50 matches, and print a summary of all matches.
 
 ```
 	team_1 = Team('Red Squad')
 	team_1.add(xw.t65xwing_rebel.wedgeantilles)
-	...
+    team_1.add(xw.t65xwing_rebel.lukeskywalker)
+
 	team_2 = Team('Onyx Squad')
 	team_2.add(xw.tielnfighter_galactic.academypilot)
 	...
+	
 	match = Match(team_1, team_2)
 	match.fight(50, brief_cnt=3, print_match_summary=True))
 ```
