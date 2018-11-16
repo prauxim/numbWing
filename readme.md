@@ -2,7 +2,7 @@
 
 A tool for rapidly simulating xwing pseudo-game results for the purposes of ship/upgrade/strategy analysis.
 
-See [this document](https://docs.google.com/spreadsheets/d/1VnyW3T58IwbWJut5lsA-ENhPpKDiGgfEvwx1bO5U_E0/edit?usp=sharing) for more info and example results
+See [this document](https://docs.google.com/spreadsheets/d/14rDknbYPsOkddNqUFo6Hhg7zirp3nfhr2oQcfwgp-ZU/edit?usp=sharing) for more info and example results
 
 The below information is only for those wishing to run the code, which is in a pre-alpha state. While the examples should run, setup may be non-trivial, and the code may not be very stable if parameters are changed. You've been warned!
 
