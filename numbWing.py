@@ -104,7 +104,7 @@ def load_ships(msg=True, write_enums=False):
 
         if write_enums:  ship_def.write('''class %s:\n''' % ship_name)
         SHIP_DATA[ship_name] = copy.copy(data)  #{'shields':0, 'attack':0, 'hull':0, 'agility': 0}
-        ship_names_df = pd.read_csv('ship_names_short.csv', index_col ='ship')
+        ship_names_df = pd.read_csv('./ship_names_short.csv', index_col ='ship')
         ship_name_short = ship_names_df['short'][ship_name]
         SHIP_DATA[ship_name]['ship_name_short'] = ship_name_short
         SHIP_DATA[ship_name]['statline'] = {'shields':0, 'attack':0, 'hull':0, 'agility': 0}
