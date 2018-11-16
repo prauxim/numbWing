@@ -63,7 +63,7 @@ Simple implementation of a generic squad benchmark. Cycles through all ships, as
 
 ## Authors
 
-* **prauxim** - *Initial work* - [prauxim](https://github.com/PurpleBooth)
+* **prauxim** - *Initial work* - [prauxim](https://github.com/prauxim)
 
 ## License
 

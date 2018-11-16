@@ -16,6 +16,9 @@ from numbWing import *
 def main():
 
 
+    if not os.path.isdir('./results'):
+        os.mkdir('./results')
+
     example_battle()
 
     run_benchmark(n_matches=50, log_cnt=1, brief_logs=True, mode='1v1', print_match_summary=True,
