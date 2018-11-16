@@ -15,11 +15,9 @@ The below information is only for those wishing to run the code, which is in a p
 5. Comment/decomment various function, and change parameters, rerun, etc. as desired in your copy of example_run.py
 
 ### Prerequisites
-1
-Python 2.7 with numpy and pandas installed
-	If you dont already have Python 2.7, you can just install the Anaconda distro and not have to worry about pacakges
-		https://repo.anaconda.com/archive/Anaconda2-5.3.0-Windows-x86_64.exe
-Some form of IDE,  e.g. pyCharm, is reccommended. For the normal reasons, plus I a lot of long enums (constant variable name) are used so autocomplete is great.
+1.Python 2.7 with numpy and pandas installed
+ - If you dont already have Python 2.7, you can just install the [Anaconda distro](https://repo.anaconda.com/archive/Anaconda2-5.3.0-Windows-x86_64.exe) and not have to worry about package installation
+2. Some form of IDE,  e.g. pyCharm, is reccommended. For the normal reasons, plus a lot of long enums (e.g. ship/pilot names) are used so autocomplete is great.
 
 
 ## Running the examples
