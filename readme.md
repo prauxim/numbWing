@@ -4,7 +4,7 @@ A tool for rapidly simulating xwing pseudo-game results for the purposes of ship
 
 See [this document](https://docs.google.com/spreadsheets/d/1VnyW3T58IwbWJut5lsA-ENhPpKDiGgfEvwx1bO5U_E0/edit?usp=sharing) for more info and example results
 
-The below information is only for those wishing to run the code, which is in a pre-alpha state. While the examples should run, expect setup to be non-trivial the code to be generally unstable and non-user friendly is changes are made. You've been warned!
+The below information is only for those wishing to run the code, which is in a pre-alpha state. While the examples should run, setup may be non-trivial, and the code may not be very stable if parameters are changed. You've been warned!
 
 ## Getting Started
 
@@ -15,7 +15,7 @@ The below information is only for those wishing to run the code, which is in a p
 5. Comment/decomment various function, and change parameters, rerun, etc. as desired in your copy of example_run.py
 
 ### Prerequisites
-
+1
 Python 2.7 with numpy and pandas installed
 	If you dont already have Python 2.7, you can just install the Anaconda distro and not have to worry about pacakges
 		https://repo.anaconda.com/archive/Anaconda2-5.3.0-Windows-x86_64.exe
