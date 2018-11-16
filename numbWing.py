@@ -3,11 +3,10 @@ from random import shuffle
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
-import enum
-from jutil import *
+import nw_enums as nw
 
 # try:
-import xw_enums as xw
+import nw_ship_enums as xw
 # except:
 #     pass
 
@@ -31,8 +30,7 @@ TARGET_LOCK = 'TARGET_LOCK'
 #     def __init__(self):
 #         self.declared_defender = 'declared_defender'
 
-class Events(enum.Enum):
-    declared_defender = 2001
+
 
 class Stats():
     def __init__(self):
@@ -48,53 +46,40 @@ defense_stats.inc_rolled = 'inc_rolled'
 defense_stats.inc_landed = 'inc_landed'
 
 
-def aaaaah():
+def aaah():
+    "Dummy function to show up first on pyCharm's alphabetized function list"
     pass
 
 def main():
-    # load_ships(msg=False)
 
-    #
-    # a,b,c = 0, 0, 0
-    # table = Table(['a', 'b', 'c'])
-    # table.add_row()
-    # a,b,c = 1, 1, 1
-    # table.add_row()
-    #
-    # _=0
+    # example_battle()
+    run_benchmark(n_matches=50, log_cnt=1, brief_logs=True, mode='1v1', print_match_summary=True,
+                  benchmark_attack=3, benchmark_defense=2)
+    run_benchmark(n_matches=50, log_cnt=0,  mode='squad', use_prev_results=True,
+                  ships='all', benchmark_attack=3, print_match_summary=False)
 
+def example_battle():
+    team_1 = Team('Red Squad')
+    team_1.add(xw.t65xwing_rebel.wedgeantilles)
+    team_1.add(xw.t65xwing_rebel.lukeskywalker)
 
+    team_2 = Team('Onyx Squad')
+    team_2.add(xw.tielnfighter_galactic.academypilot)
+    team_2.add(xw.tielnfighter_galactic.academypilot)
+    team_2.add(xw.tielnfighter_galactic.academypilot)
+    team_2.add(xw.tielnfighter_galactic.academypilot)
 
-    # import xwing_data as xw
-    # norra = Ship(xw.arc170starfighter.norrawexley)
-    # arc = Ship(xw.arc170starfighter)
-    # try:
-    #     norra = Ship(xw.arc170starfighter.norrawexley)
-    # except:
-    #     print 'Norra Wex init failed'
-    #
-    #
-    # try:
-    #     arc = Ship(xw.arc170starfighter)
-    # except:
-    #     print 'Arc default failed'
-
-    # print arc
-    # run_benchmark()
-    run_benchmark(n_battles=1, brief_cnt=0, use_predictive=True, mode='squad')
-    # run_benchmark(n_battles=1, brief_cnt=0, use_predictive=True)
+    match = Match(team_1, team_2)
+    match.fight(50, brief_cnt=3, print_match_summary=True)
 
 
-    _=0
-
-
-def load_ships(msg=True):
+def load_ships(msg=True, write_enums=False):
     # msg = True
 
     ships = glob.glob('C:/wd/pr/misc/xwing/numbWing/xwing-data2-master/data/pilots/*/*json')
     # ship_data_path = 'C:/wd/pr/misc/xwing/numbWing/xwing-data2-master/data/pilots/rebel-alliance/arc-170-starfighter.json'
 
-    ship_def = open('xw_enums.py', 'w')
+    if write_enums: ship_def = open('xw_enums.py', 'w')
     # ship_def.write('''import enum\nclass Ship_Template(enum.Enum):\n    pass\n''')
 
     global SHIP_DATA
@@ -110,16 +95,17 @@ def load_ships(msg=True):
         if msg:
             print ship_path
         stats = data['stats']
-        # print data['faction']
+        # print data['faction'] 
         faction = data['faction'].split('-')[0].split(' ')[0].lower()
         # print faction
         ship_name = '%s_%s' % (data['xws'], faction)
         if 'modifiedtieln' in ship_name:
             continue
 
-        ship_def.write('''class %s:\n''' % ship_name)
+        if write_enums:  ship_def.write('''class %s:\n''' % ship_name)
         SHIP_DATA[ship_name] = copy.copy(data)  #{'shields':0, 'attack':0, 'hull':0, 'agility': 0}
-        ship_name_short = pd.DataFrame.from_csv('ship_names_short.csv')['short'][ship_name]
+        ship_names_df = pd.read_csv('ship_names_short.csv', index_col ='ship')
+        ship_name_short = ship_names_df['short'][ship_name]
         SHIP_DATA[ship_name]['ship_name_short'] = ship_name_short
         SHIP_DATA[ship_name]['statline'] = {'shields':0, 'attack':0, 'hull':0, 'agility': 0}
         statline = SHIP_DATA[ship_name]['statline']
@@ -158,18 +144,18 @@ def load_ships(msg=True):
 
         if 'nashtahpup' in cheapest or 'autopilot' in cheapest:
             cheapest = pilot_tags[1]
-            print 'xx',  pilot_tags[0], '>>', pilot_tags[1]
+            # print 'xx',  pilot_tags[0], '>>', pilot_tags[1]
         SHIP_DATA[ship_name]['cheapest_pilot'] = copy.copy(cheapest)
-        ship_def.write('''    pilots = ['%s']\n''' % ("','".join(pilot_tags)))
+        if write_enums: ship_def.write('''    pilots = ['%s']\n''' % ("','".join(pilot_tags)))
 
         for pilot_tag in pilot_tags:
             ship_name, pilot_name = pilot_tag.split('.')
-            ship_def.write('''    %s = '%s'\n''' % (pilot_name, pilot_tag))
+            if write_enums: ship_def.write('''    %s = '%s'\n''' % (pilot_name, pilot_tag))
 
         # if msg: print pilot_tags
         # SHIP_DATA[ship_name]['pilots'] = copy.copy(pilots)
 
-    ship_def.close()
+        if write_enums: ship_def.close()
 
 
 load_ships(msg=False)
@@ -185,7 +171,7 @@ def fight():
     for i in range(2):
         team_2.add(xw.tielnfighter_galactic.academypilot)
 
-    battle = Battle(team_1, team_2)
+    battle = Match(team_1, team_2)
     battle.fight(499, log_cnt=0)
 
 
@@ -238,35 +224,70 @@ class Table:
 
 
 
-def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
-                  ships='all', hp_init=None, iterate=True,
-                  n_battles=49, log_cnt=0, brief_cnt=1,
-                  use_predictive=False, mode = 'squad'):
+def run_benchmark(ships='all', hp_init=None, iterate=True,
+                  n_matches=49, log_cnt=0, brief_logs=True,
+                  use_prev_results=True, mode = 'squad', print_match_summary=True,
+                  benchmark_attack=3, benchmark_defense=2):
+
+
+
+    """
+    Runs 1v1 or squad benchmarks for all (or some ships)
+
+    :param ships: array if benchmark_ship indtification enums, or 'all' to run all
+    :param hp_init: optional specification of stating hp, quad mode only
+    :param iterate: incrementally increase health for squad test, default true
+    :param n_matches: number of time to repeat battles, use low (~49) for testing, high (15k-50k) for final results
+    :param log_cnt: number of battle to print detailed battle logs,  for each benchmark_ship
+    :param brief_cnt: number of battle to print brief battle logs,  for each benchmark_ship
+    :param use_prev_results:  use 'guide' results, ../benchmark_%s_guide.csv must exist
+    :param mode: 'squad' or '1v1
+    :return: Nothing
+    """
+
+
 
     global LOG_LVL
     LOG_LVL = 1
 
     bm_report = True
-    n_use_prev_results = 250
 
-    summary = open('../results/benchmark_%s_n%s.csv' % (mode, n_battles), 'w')
+
+
+    summary = open('../results/benchmark_%s_n%s.csv' % (mode, n_matches), 'w')
     summary.write('')
 
+    if ships == 'all':
+        ships = SHIP_DATA.keys()
+
+    if not type(ships) == list or type(ships) == tuple:
+        ships = [ships]
+
+    Mode = mode[0].upper() + mode[1:].lower()
+    print '\nRunning %s Benchmark...\n  n=%s, %s test ships, Benchmark Atk/Agi: %s/%s' % (Mode, n_matches, len(ships), benchmark_attack, benchmark_defense)
     if mode == '1v1':
 
         metrics = ['hits_rolled', 'hits_landed', 'inc_hits', 'hits_taken', 'off_focus', 'def_focus']
-        header = ['ship', 'pilot', 'cost', '1v1dmg'] + metrics
+        header = ['benchmark_ship', 'pilot', 'cost', '1v1dmg'] + metrics
         summary.write(','.join(header) + '\n')
 
     elif mode == 'squad':
 
         metrics = ['hits_rolled', 'hits_landed', 'inc_hits', 'hits_taken', 'off_focus', 'def_focus']
-        header = ['ship', 'pilot', 'faction', 'cost', 'squad_size', 'squad_cost', 'win_rate_1', 'win_rate_2', 'enemy_health_1',
+        header = ['benchmark_ship', 'pilot', 'faction', 'cost', 'squad_size', 'squad_cost', 'win_rate_1', 'win_rate_2', 'enemy_health_1',
                   'enemy_health_2']  # + metrics
         summary.write(','.join(header) + '\n')
 
-    if ships == 'all':
-        ships = SHIP_DATA.keys()
+        if use_prev_results:
+            prev_res_path = '../results/benchmark_squad_guide.csv'
+            if os.path.exists(prev_res_path):
+                print '  Using %s to set inital benchmark hitpoints' % prev_res_path
+                prev_res = pd.read_csv(prev_res_path, index_col='ship')
+            else:
+                print 'Cannot use predictive guess for initial hitpoints, please create a copy squad benchamr mark resuls names at the path ../results/benchmark_squad_guide.csv'
+                use_prev_results = False
+
+
     for ship_type in ships:
         tst_ship = Ship(ship_type)
 
@@ -283,19 +304,23 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
             team_1 = Team('Test Squad')
             team_1.add(tst_ship)
 
-
+            team_2 = Team('Bench Squad')
             bench_ship = Ship(xw.tielnfighter_galactic.academypilot)
             bench_ship.pilot_name = 'benchmark_ship'
             bench_ship.base_hull = 999
             bench_ship.initiative = 9
+            bench_ship.base_attack = benchmark_attack
+            bench_ship.base_agility = benchmark_defense
             team_2.add(bench_ship)
             enemy_health = 'n/a'
+
+            if bm_report: print '\n---- 1v1 Benchmark: %s n=%s\n' % (tst_ship.tag, n_matches)
 
             # battle = Battle(team_1, team_2)
             # battle.fight(n, log_cnt=0, battle_summary=False)
 
-            battle = Battle(team_1, team_2)
-            battle.fight(n_battles, log_cnt=1, battle_summary=True)
+            battle = Match(team_1, team_2)
+            battle.fight(n_matches, brief_logs=brief_logs, log_cnt=log_cnt, print_match_summary=print_match_summary)
 
             dmg = round(1000 - battle.victor_health_remaining, 2)
             row = [tst_ship.ship_name_short, tst_ship.pilot_name, tst_ship.cost, dmg]
@@ -307,10 +332,20 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
                 row.append(round(np.mean(metric), 2))
 
             row = [str(x) for x in row]
-            print row
+            #
+            # print '---- 1v1 summary ----\n%s matches\n' % n_matches
+            #
+            #
+            # print ''.join(['%-16s' %x[:15] for x in header[:2]]), ''.join(['%-12s' %x for x in header[2:]])
+            # print ''.join(['%-16s' %x[:15] for x in row[:2]]), ''.join(['%-12s' %x for x in row[2:]])
+            #
+            # print '\n-------\n\n'
+
+            # sys.exit()
             summary.write(','.join(row) + '\n')
 
         elif mode == 'squad':
+
 
             team_1 = Team('Test Squad')
             team_1.add(tst_ship)
@@ -328,13 +363,13 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
 
             if hp_init == None:
                 hp_init = 4
-            if (n_battles > n_use_prev_results) or use_predictive:
-                df = pd.DataFrame.from_csv('../results/benchmark_squad_guide.csv')
-                hp_init = df.loc[tst_ship.ship_name_short]['enemy_health_1'] - 1
+            if use_prev_results:
+                # prev_res = pd.DataFrame.from_csv('../results/benchmark_squad_guide.csv')
+                hp_init = prev_res.loc[tst_ship.ship_name_short]['enemy_health_1'] - 1
             bm_health_offset = 0
             run_cnt=0
 
-            if bm_report: print '\n---- Squad Benchmark: %sx %s @ %spts n=%s' % ( squad_size, tst_ship.tag, squad_cost, n_battles)
+            if bm_report: print '\n---- Squad Benchmark: %sx %s @ %spts n=%s' % (squad_size, tst_ship.tag, squad_cost, n_matches)
             for bm_health_base in range(hp_init, 99):
                 run_cnt+=1
                 bm_health = bm_health_base + bm_health_offset
@@ -346,21 +381,22 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
 
                 # if bm_report: print '   Benchmark Squad Health: %s   Total: %s' % (str(health), bm_health)
                 for i in range(4):
-                    ship = Ship(xw.kihraxzfighter_scum)
-                    ship.pilot_name = 'benchmark_pilot'
-                    ship.initiative = 9
-                    team_2.add(ship)
+                    benchmark_ship = Ship(xw.kihraxzfighter_scum)
+                    benchmark_ship.pilot_name = 'benchmark_pilot'
+                    benchmark_ship.initiative = 9
+                    team_2.add(benchmark_ship)
                 bm_ships = team_2.ships
                 for i in range(4):
                     bm_ships[i].statline['hull'] = copy.copy(health[i])
                     bm_ships[i].statline['shields'] = 0
                     bm_ships[i].set_base_stats()
+                    benchmark_ship.base_attack = benchmark_attack
+                    benchmark_ship.base_agility = benchmark_defense
 
-                battle = Battle(team_1, team_2)
-                # log_cnt = 1 if bm_health_base == hp_init else 0
-                battle.fight(n_battles, log_cnt=log_cnt, brief_cnt=brief_cnt)
+                battle = Match(team_1, team_2)
+                battle.fight(n_matches, log_cnt=log_cnt, brief_logs=brief_logs, print_match_summary=print_match_summary)
 
-                if bm_report: print '   Benchmark Squad Health: %s   Total: %s   Winrate: %s' % (str(health), bm_health, battle.team_1_winrate)
+                if bm_report: print '   Benchmark Squad Health: %s   Total: %s   Test squad winrate: %s' % (str(health), bm_health, battle.team_1_winrate)
 
                 # print '!', battle.team_1_winrate
 
@@ -400,7 +436,7 @@ def run_benchmark(test_ship='t65xwing_rebel.bluesquadronescort',
 
 def test_mod_dice():
     ship = Ship('tstDum', ship_type=XWING)
-    ship.respawn()
+    ship.performs_setup()
     ship.perform_activation()
     ship.attack_results = [HIT, FOCUS, FOCUS]
 
@@ -410,29 +446,45 @@ def test_mod_dice():
     print ship.attack_results
 
 
-def test_off_roll(team_blue, team_red):
-    all_ships = team_red.ships + team_blue.ships
+def test_off_roll(ships, n=2):
 
-    for ship in all_ships:
-        defender = Ship('target_dummy BWING', ship_type=BWING)
-        defender.respawn()
-        defender.shields = 1
-        defender.reset()
-        defender.perform_activation()
-        ship.respawn()
-        ship.reset()
-        ship.perform_activation()
-        ship.perform_attack(defender)
+    # ships = []
 
-    sys.exit()
+    if not type(ships) == list:
+        ships = [ships]
+
+    ships_new = []
+    for ship in ships:
+        class_name = ship.__class__.__name__
+        if class_name == 'Team':
+            ships_new += ship.ships
+
+
+
+    ships = ships_new
+    # all_ships = team_red.ships + team_blue.ships
+
+    for i in range(n):
+        for ship in ships:
+            defender = Ship(xw.asf01bwing_rebel.bluesquadronpilot)
+            defender.name = 'target_dummy'
+            defender.performs_setup()
+            defender.perform_end_phase()
+            defender.perform_activation()
+            ship.performs_setup()
+            ship.perform_end_phase()
+            ship.perform_activation()
+            ship.perform_attack(defender)
+
+    # sys.exit()
 
 
 def test_def_roll(team_blue, team_red):
     all_ships = team_red.ships + team_blue.ships
 
     for ship in all_ships:
-        ship.respawn()
-        ship.reset()
+        ship.performs_setup()
+        ship.perform_end_phase()
         ship.perform_activation()
         ship.roll_defense(2)
         ship.modify_dice(die_type=EVADE)
@@ -440,25 +492,36 @@ def test_def_roll(team_blue, team_red):
     sys.exit()
 
 
-class Battle():
+class Match():
 
     def __init__(self, team1, team2):
         self.team1 = team1
         self.team2 = team2
-        self.battle_set_cnt = 0
-        self.battle_logs = OrderedDict()
+        self.match_set_cnt = 0
+        self.match_logs = OrderedDict()
 
         self.round = 0
 
-        self.print_battle_log = True
+        self.print_match_log = True
 
-    def battle_log(self, msg):
-        if self.print_battle_log:
+    def match_log(self, msg):
+        if self.print_match_log:
             print msg
 
-    def fight(self, n=1, log_cnt=1, brief_cnt=1, battle_summary_choice='use_log'):
+    def fight(self, n=1, log_cnt=0, brief_logs=True, print_match_summary='use_log'):
+
+        """
+        Core game simulation method
+
+        :param n: Number of time to repeat
+        :param log_cnt: Number of matches to print details log for
+        :param log_mode: Brief or Detailed logs,  nw.Flags.brief
+        :param print_match_summary: True, False, or 'use_log' to do match summary for detailed log only
+        :return:
+        """
+
         global LOG_LVL
-        self.battle_set_cnt += 1
+        self.match_set_cnt += 1
 
         # def fight1(team_blue, team_red):
 
@@ -480,26 +543,31 @@ class Battle():
 
         for i in range(n_battle):
 
-            battle_cnt = i + 1
+            match_cnt = i + 1
 
-            self.brief = brief_cnt >= battle_cnt
+            self.print_match_log = False
+            self.brief = False
+            self.print_match_log = log_cnt >= match_cnt
 
-            if battle_summary_choice == 'use_log':
-                battle_summary = log_cnt >= battle_cnt
+            if self.print_match_log and brief_logs:
+                self.print_match_log = False
+                self.brief = True
+
+            if print_match_summary == 'use_log':
+                match_summary = log_cnt >= match_cnt
             else:
-                battle_summary = battle_summary_choice
+                match_summary = print_match_summary
 
-            self.print_battle_log = log_cnt >= battle_cnt
             for ship in all_ships:
                 ship.print_brief = self.brief
-                ship.print_battle_log = self.print_battle_log
+                ship.print_match_log = self.print_match_log
 
-            self.battle_log('\n--- Battle %s ---' % (i+1))
-            self.battle_tag = '%s.%s' % (self.battle_set_cnt, i + 1)
+            self.match_log('\n--- Battle %s ---' % (i + 1))
+            self.match_tag = '%s.%s' % (self.match_set_cnt, i + 1)
 
-            self.battle_log('\n-- Setup --')
+            self.match_log('\n-- Setup --')
             for ship in all_ships_act_order:
-                ship.respawn()
+                ship.performs_setup()
 
             rnd_cnt = 0
             while 1:
@@ -507,21 +575,21 @@ class Battle():
 
 
 
-                self.battle_log('\n-- Round %s --' % rnd_cnt)
+                self.match_log('\n-- Round %s --' % rnd_cnt)
 
 
                 done = False
                 # shuffle(all_ships_act_order)
 
-                self.battle_log('\n- Activation -')
+                self.match_log('\n- Activation -')
                 for ship in all_ships_act_order:
-                    ship.battle_cnt = battle_cnt
+                    ship.match_cnt = match_cnt
                     ship.rnd_cnt = rnd_cnt
                     ship.perform_activation()
                     tag = ship.name
                     battle_data[tag] = {}
 
-                self.battle_log('\n- Engagement -')
+                self.match_log('\n- Engagement -')
                 for ship in all_ships_atk_order:
 
                     if ship.dead:
@@ -544,10 +612,11 @@ class Battle():
                     # for ship in all_ships_act_order:
                     #     ship.report_status()
 
-                self.battle_log('\n- End Phase-')
+                self.match_log('\n- End Phase-')
+                for ship in all_ships_act_order:
+                    ship.perform_end_phase()
                 for ship in all_ships_act_order:
                     ship.report_status()
-                    ship.reset()
 
                 blue_dead = team_blue.dead()
                 read_dead = team_red.dead()
@@ -569,6 +638,7 @@ class Battle():
 
 
                 if done:
+                    self.match_log('- Battle %s over -\n' % match_cnt)
                     if self.brief:
                         print '------\n'
                     # print '-gg-'
@@ -591,21 +661,21 @@ class Battle():
 
         def battle_summary_ph():
             pass
-        if battle_summary:
-            battle_summary_path = '../results/battle_summart.txt'
+        if match_summary:
+            battle_summary_path = '../results/battle_summary.txt'
             f_write(battle_summary_path,'')
             print '--- Battle Set Summary ---\n'
 
 
+            print n, 'battles'
             print team_blue.name, ':', ', '.join([x.name for x in team_blue.ships])
             print team_red.name, ':', ', '.join([x.name for x in team_red.ships])
 
-            for ship in team_red.ships:
-                print ship.name, ship.base_hull, ship.base_shields
-            print n, 'battles'
+            # for ship in team_red.ships:
+            #     print ship.name, ship.base_hull, ship.base_shields
             # blue_mov = round(sum(blue_mov)/float(len(blue_mov)),2)
             # red_mov = round(sum(red_mov)/float(len(red_mov)),2)
-            print '%s: %s%%    %s: %s%%    Ties: %s%%' % (team_blue.name, team_1_wins, team_red.name, team_2_wins, ties)
+            print '%s Winrate: %s%%    %s Winrate: %s%%    Ties: %s%%' % (team_blue.name, team_1_wins, team_red.name, team_2_wins, ties)
             print 'Mean Health Remaining: %s %s' % (self.victor_health_remaining, self.victor)
             # ('inc_hits', self.total_hits(attacker_roll))
             # self.record('hits_taken'
@@ -679,6 +749,9 @@ class Team():
 #     ship, pilot = identifier.split('.')
 #     return ship, pilot
 
+
+
+
 class Ship():
     def __init__(self, identifier):
 
@@ -701,10 +774,19 @@ class Ship():
         self.initiative = self.pilot_data['initiative']
         self.cost = self.pilot_data['cost']
         self.ship_name_short = self.ship_data['ship_name_short']
+        self.effects = []
+        self.match_cnt = 0
+        self.rnd_cnt = 0
+        self.print_brief = False
+        self.name = self.pilot_name
 
         self.set_base_stats()
+
+        self.default_token = FOCUS
+        self.tokens = {TARGET_LOCK: 0, FOCUS: 0, EVADE: 0, FORCE: 0}
+
         #
-        self.print_battle_log = True
+        self.print_match_log = True
         # print self.ship_data
         # print self.pilot_data
 
@@ -720,14 +802,13 @@ class Ship():
         self.force_regen = 0
         self.report_lvl = 1
 
-        self.default_token = FOCUS
-
-        self.tokens = {TARGET_LOCK: 0, FOCUS: 0, EVADE: 0, FORCE: 0}
-
         self.force = self.tokens[FORCE]
         self.focus = self.tokens[FOCUS]
         self.evade = self.tokens[EVADE]
         self.target_lock = self.tokens[TARGET_LOCK]
+
+        self.temp_agility_modifer = 0
+        self.temp_attack_modifer = 0
         #
         # ship_stats = SHIP_STATS  # {XWING: [3, 2, 2, 4], TIELN: [2, 3, 3, 0], BWING: [3, 1, 4, 4]}
         #
@@ -735,12 +816,16 @@ class Ship():
         #     stats = ship_stats[self.ship_type]
         #     self.set_base_stats(stats)
         #
-        self.triggers = {Events.declared_defender: self.null}
+        # self.triggers = {}
         #
 
         self.stats = []
         self.records = {}
         self.log_level = 1
+
+        self.triggers = {nw.Events.declared_defender: []}
+        self.setup_ship_abilities()
+
 
     def null(self):
         pass
@@ -766,7 +851,7 @@ class Ship():
         self.report('engages', defender.name, lvl=2)
         return defender
 
-    def respawn(self):
+    def performs_setup(self):
 
         self.attack = self.base_attack
         self.focus = 0
@@ -780,7 +865,7 @@ class Ship():
         self.attack_results = []
 
         self.force = copy.copy(self.force_base)
-        self.report_status(verb='respawns at')
+        self.report_status(verb='performs setup ')
 
     def perform_activation(self):
 
@@ -789,8 +874,14 @@ class Ship():
 
     def perform_attack(self, defender):
 
+
+        self.current_attack_target = defender
         res = {'hits_rolled': 0, 'hits_landed': 0}
+
+        self.trigger_effects(nw.Events.performing_attack)
+
         # print ''
+
         self.roll_attack(self.attack)
         self.modify_dice()
 
@@ -804,43 +895,71 @@ class Ship():
         self.record('hits_landed', self.total_hits(dmg))
 
         # self.report('')
-        health = '[H:%s/%s]' % (self.shields, self.hull)
-        brief = 'Battle:%-5sRnd:%-3s %-32s %-8s %2s dmg -> %32s' % (self.battle_cnt, self.rnd_cnt, self.name[:30], health, res['hits_landed'], defender.name[:30])
+        attacker_hp = '[H:%s/%s]' % (self.shields, self.hull)
+        defender_hp = '[H:%s/%s]' % (defender.shields, defender.hull)
+        brief = 'Battle:%-5sRnd:%-3s %-32s %-11s %-2s dmg -> %-32s %-10s' % (self.match_cnt, self.rnd_cnt, self.name[:30], attacker_hp, res['hits_landed'], defender.name[:30], defender_hp)
         if defender.dead:
-            brief += '  DESTROYED'
-        else:
-            brief += '   S: %-2s H: %-2s' % (defender.shields, defender.hull)
+            brief += ' DESTROYED'
         if self.print_brief:
             print brief
         # self.report_brief(brief)
 
+        self.temp_attack_modifer = 0
         return res
 
     def report_brief(self, msg):
         print msg
+
+    def trigger_effects(self, trigger):
+
+        trash = []
+        for effect in self.effects:
+            if effect.trigger == trigger:
+                self.report('triggers', effect.name)
+
+                # effect.trigger(self)
+
+                for sub_effect in effect.sub_effects:
+                    def df():
+                        pass
+                    if type(sub_effect) == type(df):
+                        sub_effect(self)
+
+            if effect.use_once == True:
+                trash.append(effect)
+
+        for effect in trash:
+            self.effects.remove(effect)
+
+
 
     def perform_defense(self, attacker_roll):
 
         if 'Luke' in self.name:
             _=0
 
-        self.triggers[Events.declared_defender]()
+        self.trigger_effects(nw.Events.declared_defender)
 
         self.attacker_roll = attacker_roll
-        self.roll_defense(self.agility)
 
-        dmg_init = self.compare_die()
+        agi_mod = self.temp_agility_modifer
+        if not agi_mod == 0:
+            mod = '%s green dice reduction' % agi_mod if agi_mod < 0 else '%s green dice bonus' % agi_mod
+            self.report('has', 'temportary %s' % mod)
+        self.roll_defense(self.agility + agi_mod)
+
+        dmg_init = self.compare_results()
         if dmg_init > 0:
             self.modify_dice(die_type=EVADE)
 
 
-        dmg = self.compare_die(apply=True)
+        dmg = self.compare_results(apply=True)
 
         inc_hits = self.total_hits(attacker_roll)
         self.record('inc_hits', inc_hits)
         evades = inc_hits-dmg
-        if evades > 0:
-            self.report('evades', evades)
+        # if evades > 0:
+        #     self.report('evades', evades)
 
         # if self.print_battle_log and evades > 0 and 'patrol' in self.pilot_name:
         #     _=0
@@ -850,6 +969,9 @@ class Ship():
 
         # print ''
         dmg = [HIT for x in range(dmg)]
+
+
+        self.temp_agility_modifer = 0
         return dmg  # needs to return actual results, currently returns all HITS
 
     def total_hits(self, roll):
@@ -866,10 +988,10 @@ class Ship():
         self.records[k].append(v)
 
 
-    def reset(self):
+    def perform_end_phase(self):
+        self.regen_force()
         self.tokens[FOCUS] = 0
         self.tokens[EVADE] = 0
-        self.regen_force()
 
     def regen_force(self):
 
@@ -908,7 +1030,7 @@ class Ship():
                 results = non_blanks + reroll
             self.target_lock -= 1
             self.report('used Target Lock')
-            self.report('rerolls to ', str(results))
+            # self.report('rerolls to ', str(results))
 
         if results.count(FOCUS) < 1:
             pass
@@ -918,7 +1040,7 @@ class Ship():
             token = FOCUS
         else:
             self.record(focus_use_metric, 0)
-            self.report('No tokens!! : %s' % str(self.tokens))
+            # self.report('No tokens!! : %s' % str(self.tokens))
 
         if token == FOCUS:
             foci = results.count(FOCUS)
@@ -933,8 +1055,8 @@ class Ship():
                 self.force -= 1
                 results.remove(FOCUS)
                 results.append(die_type)
-                self.report('uses %s token to change <o> to %s' % (token, die_type))
-                self.report('has %s force tokens remaining' % (self.force))
+                self.report('uses %s token to change <o> to %s, %s force remaining' % (token, die_type, self.force))
+                # self.report('has %s force tokens remaining' % (self.force))
 
         if defensive:
             self.defensive_results = results
@@ -943,6 +1065,10 @@ class Ship():
 
         self.record(focus_use_metric, focus_used)
 
+        attack_defense = 'defensive' if defensive else 'attack'
+        self.report('%s results are' % attack_defense, results)
+
+        self.report('#')
     def report(self, verb, noun='', lvl=1):
         # self.report_lvl = 0
 
@@ -956,7 +1082,7 @@ class Ship():
             verb = verb.replace('#', '')
             name = ''
 
-        if self.print_battle_log:
+        if self.print_match_log:
         # if LOG_LVL == 1:
             print '%s %s %s %s' % (indent, name, verb, noun)
 
@@ -979,7 +1105,7 @@ class Ship():
         self.report('rolls defense', results)
         self.defensive_results = results
 
-    def compare_die(self, apply=False):
+    def compare_results(self, apply=False):
         self.hits = self.attacker_roll.count(HIT) + self.attacker_roll.count(CRIT)
         self.evades = self.defensive_results.count(EVADE)
 
@@ -1022,87 +1148,103 @@ class Ship():
                 self.dead = True
 
             # print ''
-        self.report('#')
         # print '>>', damage
+            self.report('#')
         return damage
 
-    def report_status(self, lvl=0, verb='has'):
+
+    def report_status(self, lvl=1, verb='has'):
 
         if self.dead:
             verb = 'DESTROYED, ' + verb
         msg = 'Attack:%(base_attack)s | Agility:%(base_agility)s | Hull:%(hull)s/%(base_hull)s hull | Shields: %(shields)s/%(base_shields)s' % self.__dict__
+        if self.force_base > 0:
+            msg += ' | Force: %(force)s' % self.__dict__
         self.report(verb, msg, lvl=lvl)
 
         return self.shields + self.hull
 
-class Named_Pilots():
-    def __init__(self):
-        pass
 
-    def Luke_Skywalker(self):
-        ship = Ship('Luke', XWING)
+    def add_effect(self, effect):
+        self.effects.append(effect)
+    def setup_ship_abilities(self):
 
-        ship.force_base = 2
-        ship.force_regen = 1
-        ship.default_token = TARGET_LOCK
-        ship.triggers[Events.declared_defender] = ship.regen_force
+        pilot_ability = None
+        ship_ability = None
 
-        return ship
+        if self.tag == xw.t65xwing_rebel.wedgeantilles:
 
-# #
-#
-# class X_Wing():
-#     def __init__(self):
-#         pass
-#
-#     def Luke_Skywalker(self):
-#         ship = Ship('Luke', XWING)
-#         ship.initiative = 5
-#         ship.force_base = 2
-#         ship.force_regen = 1
-#         ship.default_token = TARGET_LOCK
-#         ship.triggers[Events.declared_defender] = ship.regen_force
-#         return ship
-#
-# #
-# # x_wing = X_Wing()
-#
-# class Tie_LN():
-#     def __init__(self):
-#         pass
-#     def Academy_Pilot(self):
-#         ship = Ship('Academy Pilot', TIELN)
-#         ship.initiative = 1
-#         return ship
-#
-# tie_ln = Tie_LN()
-#
+            pilot_ability = Ability(trigger=nw.Events.performing_attack)
+
+            def wedge_pilot_effect(self):
+                self.current_attack_target.temp_agility_modifer -= 1
+
+            pilot_ability.add_effect(wedge_pilot_effect)
+
+        if self.tag == xw.t65xwing_rebel.lukeskywalker:
+            self.force_base = 2
+            self.force_regen = 1
+            self.default_token = TARGET_LOCK
+
+            pilot_ability = Ability(trigger=nw.Events.declared_defender)
+
+            def luke_pilot_effect(self):
+                self.regen_force()
+
+            pilot_ability.add_effect(luke_pilot_effect)
 
 
 
 
+        # if self.tag == xw.starviperclassattackplatform_scum.guri:
+        #     pilot_ability = Ability(trigger=nw.Events.engagement_phase_start)
+        #     pilot_ability.proc_rate = 0.75
+        #
+        #     def guri_ability_effect():
+        #         self.tokens[FOCUS] += 1
+        #     pilot_ability.add_effect(guri_ability_effect)
+
+        if pilot_ability is not None:
+            self.add_effect(pilot_ability)
+
+        if ship_ability is not None:
+            self.add_effect(ship_ability)
 
 
-#
-# class Luke(Ship):
-#     def __init__(self):
-#         Ship.__init__(self, 'Luke', XWING)
-#         # self.force = 2
-#         self.force_base = 2
-#         self.force_regen = 1
-#         self.default_token = TARGET_LOCK
-#         self.triggers[events.declared_defender] = self.regen_force
-    #
-    # def perform_defense(self, attacker_roll):
-    #     Ship.regen_force(self)
-    #     Ship.perform_defense(self, attacker_roll)
+class Ability():
+    def __init__(self, name='pilot ability', action=None, trigger=None):
+        self.name = name
+        self.limited_used = False
+        self.use_once = False
+        self.used_remaining = 1
+        self.trigger = trigger
+        self.action=action
+        self.sub_effects = []
+        self.proc_rate = 1.0
+
+    def add_effect(self, effect):
+        self.sub_effects.append(effect)
 
 
-#
-# class Shara(Ship):
-#     def __init__(self):
-#         Ship.__init__(self, 'Shara', ARC)
+# A set of function to make file read/write easier because I'm a lazy bum
+def f_core(path, text, mode, lvl=2):
+    fl = open(path, mode)
+    if 'r' in mode:
+        txt = fl.read()
+        fl.close()
+        return txt
+    else:
+        fl.write(text)
+        fl.close()
+        return path
 
+f_clear = lambda path: f_core(path, '', 'w')
+f_add = lambda path, text: f_core(path, text, 'a')
+f_addline = lambda path, text: f_core(path, str(text) + '\n', 'a')
+f_addlines = lambda path, text: f_core(path, '\n'.join(text), 'a')
+f_write = lambda path, text: f_core(path, text, 'w')
+f_writeline = lambda path, text: f_core(path, str(text) + '\n', 'w')
+f_writelines = lambda path, text: f_core(path, '\n'.join(text), 'w')
 
 
 if __name__ == '__main__':

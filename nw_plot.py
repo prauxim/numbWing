@@ -3,9 +3,18 @@ import numpy as np
 import pandas as pd
 from numpy.polynomial.polynomial import polyfit
 from numbWing import *
+from nw_plot import *
 
 
-def plot_main():
+
+def main():
+    comp_plot()
+
+
+def comp_plot():
+
+    """Comparison ov 1v1 vs Squad results, WIP"""
+
     # plot_1v1()
     plot_squad()
     fig, ax = plt.subplots()
