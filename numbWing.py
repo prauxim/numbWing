@@ -76,8 +76,8 @@ def example_battle():
 def load_ships(msg=True, write_enums=False):
     # msg = True
 
-    ships = glob.glob('C:/wd/pr/misc/xwing/numbWing/xwing-data2-master/data/pilots/*/*json')
-    # ship_data_path = 'C:/wd/pr/misc/xwing/numbWing/xwing-data2-master/data/pilots/rebel-alliance/arc-170-starfighter.json'
+    ships = glob.glob('./pilots/*/*json')
+    # ship_data_path = './pilots/rebel-alliance/arc-170-starfighter.json'
 
     if write_enums: ship_def = open('xw_enums.py', 'w')
     # ship_def.write('''import enum\nclass Ship_Template(enum.Enum):\n    pass\n''')
